@@ -3,8 +3,15 @@ uvicorn[standard]==0.30.6
 sqlmodel==0.0.22
 psycopg2-binary==2.9.10
 duckdb==1.5.5
-polars==1.44.1
 pandas==2.2.2
+# Pinned below its usual latest on purpose: numpy's default PyPI wheel from ~1.25
+# onward requires x86-64-v2 CPU baseline (SSE3/SSE4.x/POPCNT). This crashed on the
+# Bharat Cloud VM with "NumPy was built with baseline optimizations: (X86_V2) but
+# your machine doesn't support" — that VM's virtualized CPU doesn't expose those
+# instructions. 1.24.4 is the last release built against the universally-supported
+# SSE2 baseline, and is still within pandas 2.2.2's supported numpy range for
+# Python 3.11 (>=1.23.2,<2).
+numpy==1.24.4
 openpyxl==3.1.5
 python-multipart==0.0.9
 aiofiles==24.1.0
