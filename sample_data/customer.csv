@@ -1,0 +1,4 @@
+custid,first_name,last_name,date_of_birth,phone,email
+1001,Rahul,Sharma,1995-04-12,9876543210,rahul@example.com
+1002,Anita,Verma,1988-11-03,9876500000,changed_anita@example.com
+1004,John,Doe,1992-07-19,9876522222,john@example.com

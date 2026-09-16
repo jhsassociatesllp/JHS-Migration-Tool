@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# Storage (uploaded files, generated parquet, results, exports, sqlite db)
+storage/**/*
+!storage/**/.gitkeep
+
+# Node / frontend
+node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Env
+.env
+
+# OS
+.DS_Store

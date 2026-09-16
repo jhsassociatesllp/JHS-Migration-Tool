@@ -1,0 +1,45 @@
+# No top-level `name:` on purpose — Compose then derives the project name from the
+# containing directory (~/apps/migration-tool-production on the VM), which is what keeps
+# its containers/volumes/network from colliding with the other apps (vendor, CRM) already
+# running on the same Docker host, without any extra flags.
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-migrationtool}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      POSTGRES_DB: ${DB_NAME:-migrationtool}
+    volumes:
+      - migrationtool_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-migrationtool}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    # Not published to the host on purpose — only the app container talks to it,
+    # matching how vendor/CRM keep Postgres off the public internet. Uncomment to reach
+    # it directly from the VM for debugging (e.g. psql, pgAdmin over an SSH tunnel):
+    # ports:
+    #   - "127.0.0.1:${DB_TUNNEL_PORT:-15434}:5432"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "postgresql+psycopg2://${DB_USER:-migrationtool}:${DB_PASSWORD:?Set DB_PASSWORD in .env}@db:5432/${DB_NAME:-migrationtool}"
+      APP_STORAGE_ROOT: /app/storage
+    ports:
+      - "${APP_PORT:?Set APP_PORT in .env — 8050 for production}:8060"
+    volumes:
+      - migrationtool_storage:/app/storage
+
+volumes:
+  migrationtool_pgdata:
+  migrationtool_storage:
